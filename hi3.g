@@ -107,11 +107,29 @@ import java.util.LinkedList;
        	}
        	//check if we got a space!
        	if(ch == ' ')
-       	{ //next char must be a number!
-	       	ch =  input.LA(++i + 1);
+       	{ 
+       
+       	//next char must be a number!
+	    	ch =  input.LA(++i + 1);
        		if(ch >= '0' && ch <= '9')
        		{
        			return true;
+       		}
+       		//we could have a case where the following input is presented:
+       		//1 STATE RD N
+       		//in this case we want to parse STATE RD as the Street Name
+       		//and N as the post directional       		
+       		else if(ch != 'N' && ch != 'S' && ch != 'E' && ch != 'W' && ch != '#')
+       		{
+	       		ch =  input.LA(++i + 1);
+	       		//now look for a space
+	       		//we can't allow two character street names in this context
+	       		//as we might cause a mismatch with a secondary unit type. 
+	       		//e.g. PH, RM, etc.
+       			if(ch == ' ' || ch == 'E' || ch == 'W' || ch == -1)
+		       		return true;
+		       	else
+		       		return false;
        		}
        		else
        		{       //we didn't get a SPACE followed by a number, so it is not a Street Name Pre Type!
@@ -134,8 +152,9 @@ import java.util.LinkedList;
         return errors;
     }
 }
-
-Suffixes : ('ALLEE'|'ALLEY'|'ALLY'|'ALY'|'ANEX'|'ANNEX'|'ANNX'|'ANX'|'ARC'|'ARCADE'|'AV'|'AVE'|'AVEN'|'AVENU'|'AVENUE'|'AVN'|'AVNUE'|'BAYOO'|'BAYOU'|'BCH'|'BEACH'|'BEND'|'BND'|'BLF'|'BLUF'|'BLUFF'|'BLUFFS'|'BOT'|'BOTTM'|'BOTTOM'|'BTM'|'BLVD'|'BOUL'|'BOULEVARD'|'BOULV'|'BR'|'BRANCH'|'BRNCH'|'BRDGE'|'BRG'|'BRIDGE'|'BRK'|'BROOK'|'BROOKS'|'BURG'|'BURGS'|'CAMP'|'CMP'|'CP'|'CANYN'|'CANYON'|'CNYN'|'CYN'|'CAPE'|'CPE'|'CAUSEWAY'|'CAUSWAY'|'CSWY'|'CEN'|'CENT'|'CENTER'|'CENTR'|'CENTRE'|'CNTER'|'CNTR'|'CTR'|'CENTERS'|'CIR'|'CIRC'|'CIRCL'|'CIRCLE'|'CRCL'|'CRCLE'|'CIRCLES'|'CLF'|'CLIFF'|'CLFS'|'CLIFFS'|'CLB'|'CLUB'|'COMMON'|'COR'|'CORNER'|'CORNERS'|'CORS'|'COURSE'|'CRSE'|'COURT'|'CRT'|'CT'|'COURTS'|'CTS'|'COVE'|'CV'|'COVES'|'CK'|'CR'|'CREEK'|'CRK'|'CRECENT'|'CRES'|'CRESCENT'|'CRESENT'|'CRSCNT'|'CRSENT'|'CRSNT'|'CREST'|'CROSSING'|'CRSSING'|'CRSSNG'|'XING'|'CROSSROAD'|'CURVE'|'DALE'|'DL'|'DAM'|'DM'|'DIV'|'DIVIDE'|'DV'|'DVD'|'DR'|'DRIV'|'DRIVE'|'DRV'|'DRIVES'|'EST'|'ESTATE'|'ESTATES'|'ESTS'|'EXP'|'EXPR'|'EXPRESS'|'EXPW'|'EXPY'|'EXT'|'EXTENSION'|'EXTN'|'EXTNSN'|'EXTENSIONS'|'EXTS'|'FALL'|'FALLS'|'FLS'|'FERRY'|'FRRY'|'FRY'|'FIELD'|'FLD'|'FIELDS'|'FLDS'|'FLAT'|'FLT'|'FLATS'|'FLTS'|'FORD'|'FRD'|'FORDS'|'FOREST'|'FORESTS'|'FRST'|'FORG'|'FORGE'|'FRG'|'FORGES'|'FORK'|'FRK'|'FORKS'|'FRKS'|'FORT'|'FRT'|'FT'|'FREEWAY'|'FREEWY'|'FRWAY'|'FRWY'|'FWY'|'GARDEN'|'GARDN'|'GDN'|'GRDEN'|'GRDN'|'GARDENS'|'GDNS'|'GRDNS'|'GATEWAY'|'GATEWY'|'GATWAY'|'GTWAY'|'GTWY'|'GLEN'|'GLN'|'GLENS'|'GREEN'|'GRN'|'GREENS'|'GROV'|'GROVE'|'GRV'|'GROVES'|'HARB'|'HARBOR'|'HARBR'|'HBR'|'HRBOR'|'HARBORS'|'HAVEN'|'HAVN'|'HVN'|'HEIGHT'|'HEIGHTS'|'HGTS'|'HT'|'HTS'|'HILL'|'HL'|'HILLS'|'HLS'|'HLLW'|'HOLLOW'|'HOLLOWS'|'HOLW'|'HOLWS'|'INLET'|'INLT'|'IS'|'ISLAND'|'ISLND'|'ISLANDS'|'ISLNDS'|'ISS'|'ISLE'|'ISLES'|'JCT'|'JCTION'|'JCTN'|'JUNCTION'|'JUNCTN'|'JUNCTON'|'JCTNS'|'JCTS'|'JUNCTIONS'|'KEY'|'KY'|'KEYS'|'KYS'|'KNL'|'KNOL'|'KNOLL'|'KNLS'|'KNOLLS'|'LAKE'|'LK'|'LAKES'|'LKS'|'LAND'|'LANDING'|'LNDG'|'LNDNG'|'LA'|'LANE'|'LANES'|'LN'|'LGT'|'LIGHT'|'LIGHTS'|'LF'|'LOAF'|'LCK'|'LOCK'|'LCKS'|'LOCKS'|'LDG'|'LDGE'|'LODG'|'LODGE'|'LOOPS'|'MALL'|'MANOR'|'MNR'|'MANORS'|'MNRS'|'MDW'|'MEADOW'|'MDWS'|'MEADOWS'|'MEDOWS'|'MEWS'|'MILL'|'ML'|'MILLS'|'MLS'|'MISSION'|'MISSN'|'MSN'|'MSSN'|'MOTORWAY'|'MNT'|'MOUNT'|'MT'|'MNTAIN'|'MNTN'|'MOUNTAIN'|'MOUNTIN'|'MTIN'|'MTN'|'MNTNS'|'MOUNTAINS'|'NCK'|'NECK'|'ORCH'|'ORCHARD'|'ORCHRD'|'OVAL'|'OVL'|'OVERPASS'|'PARK'|'PK'|'PRK'|'PARKS'|'PARKWAY'|'PARKWY'|'PKWAY'|'PKWY'|'PKY'|'PARKWAYS'|'PKWYS'|'PASS'|'PASSAGE'|'PATH'|'PATHS'|'PIKE'|'PIKES'|'PINE'|'PINES'|'PNES'|'PL'|'PLACE'|'PLAIN'|'PLN'|'PLAINES'|'PLAINS'|'PLNS'|'PLAZA'|'PLZ'|'PLZA'|'POINT'|'PT'|'POINTS'|'PTS'|'PORT'|'PRT'|'PORTS'|'PRTS'|'PR'|'PRAIRIE'|'PRARIE'|'PRR'|'RAD'|'RADIAL'|'RADIEL'|'RADL'|'RAMP'|'RANCH'|'RANCHES'|'RNCH'|'RNCHS'|'RAPID'|'RPD'|'RAPIDS'|'RPDS'|'REST'|'RST'|'RDG'|'RDGE'|'RIDGE'|'RDGS'|'RIDGES'|'RIV'|'RIVER'|'RIVR'|'RVR'|'ROAD'|'RDS'|'ROADS'|'ROW'|'RUE'|'RUN'|'SHL'|'SHOAL'|'SHLS'|'SHOALS'|'SHOAR'|'SHORE'|'SHR'|'SHOARS'|'SHORES'|'SHRS'|'SKYWAY'|'SPG'|'SPNG'|'SPRING'|'SPRNG'|'SPGS'|'SPNGS'|'SPRINGS'|'SPRNGS'|'SPUR'|'SPURS'|'SQ'|'SQR'|'SQRE'|'SQU'|'SQUARE'|'SQRS'|'SQUARES'|'STATION'|'STATN'|'STN'|'STRA'|'STRAV'|'STRAVE'|'STRAVEN'|'STRAVENUE'|'STRAVN'|'STRVN'|'STRVNUE'|'STREAM'|'STREME'|'STRM'|'ST'|'STR'|'STREET'|'STRT'|'STREETS'|'SMT'|'SUMIT'|'SUMITT'|'SUMMIT'|'TER'|'TERR'|'TERRACE'|'THROUGHWAY'|'TRACE'|'TRACES'|'TRCE'|'TRACK'|'TRACKS'|'TRAK'|'TRK'|'TRKS'|'TRAFFICWAY'|'TRFY'|'TR'|'TRAIL'|'TRAILS'|'TRL'|'TRLS'|'TUNEL'|'TUNL'|'TUNLS'|'TUNNEL'|'TUNNELS'|'TUNNL'|'TPK'|'TPKE'|'TRNPK'|'TRPK'|'TURNPIKE'|'TURNPK'|'UNDERPASS'|'UN'|'UNION'|'UNIONS'|'VALLEY'|'VALLY'|'VLLY'|'VLY'|'VALLEYS'|'VLYS'|'VDCT'|'VIA'|'VIADCT'|'VIADUCT'|'VIEW'|'VW'|'VIEWS'|'VWS'|'VILL'|'VILLAG'|'VILLAGE'|'VILLG'|'VILLIAGE'|'VLG'|'VILLAGES'|'VLGS'|'VILLE'|'VL'|'VIS'|'VIST'|'VISTA'|'VST'|'VSTA'|'WALK'|'WALKS'|'WALL'|'WAY'|'WY'|'WAYS'|'WELL'|'WELLS'|'WLS'|'JUMP'|'CHASE'|'RESERVE'|'GATE'|'CROSS'|'END'|'GLORY'|'POINTE');
+/* USPS Pub 28 used as domain */
+Suffixes : ('ALLEE'|'ALLEY'|'ALLY'|'ALY'|'ANEX'|'ANNEX'|'ANNX'|'ANX'|'ARC'|'ARCADE'|'AV'|'AVE'|'AVEN'|'AVENU'|'AVENUE'|'AVN'|'AVNUE'|'BAYOO'|'BAYOU'|'BCH'|'BEACH'|'BEND'|'BLF'|'BLUF'|'BLUFF'|'BLUFFS'|'BLVD'|'BND'|'BOT'|'BOTTM'|'BOTTOM'|'BOUL'|'BOULEVARD'|'BOULV'|'BR'|'BRANCH'|'BRDGE'|'BRG'|'BRIDGE'|'BRK'|'BRNCH'|'BROOK'|'BROOKS'|'BTM'|'BURG'|'BURGS'|'CAMP'|'CANYN'|'CANYON'|'CAPE'|'CAUSEWAY'|'CAUSWA'|'CAUSWAY'|'CEN'|'CENT'|'CENTER'|'CENTERS'|'CENTR'|'CENTRE'|'CIR'|'CIRC'|'CIRCL'|'CIRCLE'|'CIRCLES'|'CK'|'CLB'|'CLF'|'CLFS'|'CLIFF'|'CLIFFS'|'CLUB'|'CMP'|'CNTER'|'CNTR'|'CNYN'|'COMMON'|'COMMONS'|'COR'|'CORNER'|'CORNERS'|'CORS'|'COURSE'|'COURT'|'COURTS'|'COVE'|'COVES'|'CP'|'CPE'|'CR'|'CRCL'|'CRCLE'|'CRECENT'|'CREEK'|'CRES'|'CRESCENT'|'CRESENT'|'CREST'|'CRK'|'CROSSING'|'CROSSROAD'|'CROSSROADS'|'CRSCNT'|'CRSE'|'CRSENT'|'CRSNT'|'CRSSING'|'CRSSNG'|'CRT'|'CSWY'|'CT'|'CTR'|'CTS'|'CURVE'|'CV'|'CYN'|'DALE'|'DAM'|'DIV'|'DIVIDE'|'DL'|'DM'|'DR'|'DRIV'|'DRIVE'|'DRIVES'|'DRV'|'DV'|'DVD'|'EST'|'ESTATE'|'ESTATES'|'ESTS'|'EXP'|'EXPR'|'EXPRESS'|'EXPW'|'EXPY'|'EXT'|'EXTENSION'|'EXTENSIONS'|'EXTN'|'EXTNSN'|'EXTS'|'FALL'|'FALLS'|'FERRY'|'FIELD'|'FIELDS'|'FLAT'|'FLATS'|'FLD'|'FLDS'|'FLS'|'FLT'|'FLTS'|'FORD'|'FORDS'|'FOREST'|'FORESTS'|'FORG'|'FORGE'|'FORGES'|'FORK'|'FORKS'|'FORT'|'FRD'|'FREEWAY'|'FREEWY'|'FRG'|'FRK'|'FRKS'|'FRRY'|'FRST'|'FRT'|'FRWAY'|'FRWY'|'FRY'|'FT'|'FWY'|'GARDEN'|'GARDENS'|'GARDN'|'GATEWAY'|'GATEWY'|'GATWAY'|'GDN'|'GDNS'|'GLEN'|'GLENS'|'GLN'|'GRDEN'|'GRDN'|'GRDNS'|'GREEN'|'GREENS'|'GRN'|'GROV'|'GROVE'|'GROVES'|'GRV'|'GTWAY'|'GTWY'|'HARB'|'HARBOR'|'HARBORS'|'HARBR'|'HAVEN'|'HAVN'|'HBR'|'HEIGHT'|'HEIGHTS'|'HGTS'|'HIGHWY'|'HILL'|'HILLS'|'HL'|'HLLW'|'HLS'|'HOLLOW'|'HOLLOWS'|'HOLW'|'HOLWS'|'HRBOR'|'HT'|'HTS'|'HVN'|'HWAY'|'HWY'|'INLET'|'INLT'|'IS'|'ISLAND'|'ISLANDS'|'ISLE'|'ISLES'|'ISLND'|'ISLNDS'|'ISS'|'JCT'|'JCTION'|'JCTN'|'JCTNS'|'JCTS'|'JUNCTION'|'JUNCTIONS'|'JUNCTN'|'JUNCTON'|'KEY'|'KEYS'|'KNL'|'KNLS'|'KNOL'|'KNOLL'|'KNOLLS'|'KY'|'KYS'|'LA'|'LAKE'|'LAKES'|'LAND'|'LANDING'|'LANE'|'LANES'|'LCK'|'LCKS'|'LDG'|'LDGE'|'LF'|'LGT'|'LIGHT'|'LIGHTS'|'LK'|'LKS'|'LN'|'LNDG'|'LNDNG'|'LOAF'|'LOCK'|'LOCKS'|'LODG'|'LODGE'|'LOOPS'|'MALL'|'MANOR'|'MANORS'|'MDW'|'MDWS'|'MEADOW'|'MEADOWS'|'MEDOWS'|'MEWS'|'MILL'|'MILLS'|'MISSION'|'MISSN'|'ML'|'MLS'|'MNR'|'MNRS'|'MNT'|'MNTAIN'|'MNTN'|'MNTNS'|'MOTORWAY'|'MOUNT'|'MOUNTAIN'|'MOUNTAINS'|'MOUNTIN'|'MSN'|'MSSN'|'MT'|'MTIN'|'MTN'|'NCK'|'NECK'|'ORCH'|'ORCHARD'|'ORCHRD'|'OVAL'|'OVERPASS'|'OVL'|'PARK'|'PARKS'|'PARKWAY'|'PARKWAYS'|'PARKWY'|'PASS'|'PASSAGE'|'PATH'|'PATHS'|'PIKE'|'PIKES'|'PINE'|'PINES'|'PK'|'PKWAY'|'PKWY'|'PKWYS'|'PKY'|'PL'|'PLACE'|'PLAIN'|'PLAINES'|'PLAINS'|'PLAZA'|'PLN'|'PLNS'|'PLZ'|'PLZA'|'PNES'|'POINT'|'POINTS'|'PORT'|'PORTS'|'PR'|'PRAIRIE'|'PRARIE'|'PRK'|'PRR'|'PRT'|'PRTS'|'PT'|'PTS'|'RAD'|'RADIAL'|'RADIEL'|'RADL'|'RAMP'|'RANCH'|'RANCHES'|'RAPID'|'RAPIDS'|'RDG'|'RDGE'|'RDGS'|'RDS'|'REST'|'RIDGE'|'RIDGES'|'RIV'|'RIVER'|'RIVR'|'RNCH'|'RNCHS'|'ROAD'|'ROADS'|'ROUTE'|'ROW'|'RPD'|'RPDS'|'RST'|'RUE'|'RUN'|'RVR'|'SHL'|'SHLS'|'SHOAL'|'SHOALS'|'SHOAR'|'SHOARS'|'SHORE'|'SHORES'|'SHR'|'SHRS'|'SKYWAY'|'SMT'|'SPG'|'SPGS'|'SPNG'|'SPNGS'|'SPRING'|'SPRINGS'|'SPRNG'|'SPRNGS'|'SPUR'|'SPURS'|'SQ'|'SQR'|'SQRE'|'SQRS'|'SQU'|'SQUARE'|'SQUARES'|'ST'|'STA'|'STATION'|'STATN'|'STN'|'STR'|'STRA'|'STRAV'|'STRAVE'|'STRAVEN'|'STRAVENUE'|'STRAVN'|'STREAM'|'STREET'|'STREETS'|'STREME'|'STRM'|'STRT'|'STRVN'|'STRVNUE'|'SUMIT'|'SUMITT'|'SUMMIT'|'TER'|'TERR'|'TERRACE'|'THROUGHWAY'|'TPK'|'TPKE'|'TR'|'TRACE'|'TRACES'|'TRACK'|'TRACKS'|'TRAFFICWAY'|'TRAIL'|'TRAILS'|'TRAK'|'TRCE'|'TRFY'|'TRK'|'TRKS'|'TRL'|'TRLRS'|'TRLS'|'TRNPK'|'TRPK'|'TUNEL'|'TUNL'|'TUNLS'|'TUNNEL'|'TUNNELS'|'TUNNL'|'TURNPIKE'|'TURNPK'|'UN'|'UNDERPASS'|'UNION'|'UNIONS'|'VALLEY'|'VALLEYS'|'VALLY'|'VDCT'|'VIA'|'VIADCT'|'VIADUCT'|'VIEW'|'VIEWS'|'VILL'|'VILLAG'|'VILLAGE'|'VILLAGES'|'VILLE'|'VILLG'|'VILLIAGE'|'VIS'|'VIST'|'VISTA'|'VL'|'VLG'|'VLGS'|'VLLY'|'VLY'|'VLYS'|'VST'|'VSTA'|'VW'|'VWS'|'WALK'|'WALKS'|'WALL'|'WAY'|'WAYS'|'WELL'|'WELLS'|'WLS'|'WY'|'XING'
+);
 //Highways
 //Anything with a space will require a semantic predicate :(
 //NO KY IN HIGHWAYS//
@@ -155,6 +174,10 @@ UsHighway : {ahead_pt("US HI")||ahead_pt("US HW")}?
 		=> ('US' SPACE 'HIGHWAY'|'US' SPACE 'HIGHWY'|'US' SPACE 'HIWAY'|'US' SPACE 'HIWY'
 		//us hi
 		|'US' SPACE 'HWAY'|'US' SPACE 'HWY'); 
+/* 5,266 confirmed cases. Not in 28.F, but should be! */
+CommonUSRoute 
+	:	('US' SPACE 'ROUTE' | 'US' SPACE 'RTE')
+	;
 		
 CountyHighway : {ahead_pt("COUNTY HI")||ahead_pt("CNTY HI")||ahead_pt("COUNTY HW")||ahead_pt("CNTY HW")}?
 		=> ('COUNTY' SPACE 'HIGHWAY'|'COUNTY' SPACE 'HIGHWY'|'COUNTY' SPACE 'HIWAY'|'COUNTY' SPACE 'HIWY'|'COUNTY' SPACE 'HWAY'|'COUNTY' SPACE 'HWY'
@@ -220,22 +243,29 @@ SuffixHighwayFollowUnion
 	:	 ('BYP'|'BYPA'|'BYPAS'|'BYPASS'|'BYPS');
     
 //Designators
-StandardSecondaryAddressIdentifier: ('APARTMENT'|'APT'|'BUILDING'|'BLDG'|'DEPARTMENT'|'DEPT'|'FLOOR'|'FL'|'HANGER'|'HNGR'|'KEY'|'LOT'|'PIER'|'ROOM'|'RM'|'SLIP'|'SPACE'|'SPC'|'STOP'|'SUITE'|'STE'|'TRAILER'|'TRLR'|'UNIT');
-ExtendedSecondaryAddressIdentifier : ('BASEMENT'|'BSMT'|'FRONT'|'FRNT'|'LOBBY'|'LBBY'|'LOWER'|'LOWR'|'OFFICE'|'OFC'|'PENTHOUSE'|'PH'|'REAR'|'SIDE'|'UPPER'|'UPPR');
+/* Those commented out have no addresses in the wild from our CASS */
+StandardSecondaryAddressType: ('APARTMENT'|'APT'|'BUILDING'|'BLDG'|'DEPARTMENT'|'DEPT'|'FLOOR'|'FL'|'HANGER'|'HNGR'|'KEY'|'LOT'|'PIER'|'ROOM'|'RM'|'SLIP'|'SPACE'|'SPC'|'STOP'|'SUITE'|'STE'|'TRAILER'|'TRLR'|'UNIT');
+ExtendedSecondaryAddressType : ('BASEMENT'|'BSMT'|'FRONT'|'FRNT'|'LOBBY'|'LBBY'|'LOWER'|'LOWR'|'OFFICE'|'OFC'|'PENTHOUSE'|'PH'|'REAR'|'SIDE'|'UPPER'|'UPPR');
 
 
+//this syn predicate gets rid of some ambigutity for street number cases like S123, so it won't match here
 
-AbbreviatedDirectional :  ('N'|'S'|'E'|'W'|'NW'|'NE'|'SW'|'SE')
+
+AbbreviatedDirectional 
+	:	 //{ahead_pt('N ')||ahead_pt('S ')||ahead_pt('E ')||ahead_pt('W ')||ahead_pt('NW ')||ahead_pt('NE ')||ahead_pt('SW ')||ahead_pt('SE ')}
+				//=>
+				 ('N'|'S'|'E'|'W'|'NW'|'NE'|'SW'|'SE')
 	;
 Directional 
 	:	 ('NORTH'|'SOUTH'|'EAST'|'WEST'|'NORTHWEST'|'NORTHEAST'|'SOUTHWEST'|'SOUTHEAST')
 	;
 SpacedDirectional
-	: {ahead_pt("NORTH WEST")||ahead_pt("NORTH EAST")||ahead_pt("SOUTH WEST")||ahead_pt("SOUTH EAST")}?
-		=> ('NORTH' SPACE 'WEST'|'NORTH' SPACE 'EAST'|'SOUTH' SPACE 'WEST'|'SOUTH' SPACE 'EAST');
+	: 	{ahead_pt("NORTH WEST")||ahead_pt("NORTH EAST")||ahead_pt("SOUTH WEST")||ahead_pt("SOUTH EAST")}?
+			=> ('NORTH' SPACE 'WEST'|'NORTH' SPACE 'EAST'|'SOUTH' SPACE 'WEST'|'SOUTH' SPACE 'EAST');
 
+/* Domain sourced from TIGER Technical Documentation 2013 (Appendix E) */
 PreModifier
-	:	('OLD'|'ALTERNATE')
+	:	 ('ACC'|'ALT'|'BUS'|'BYP'|'CON'|'EXD'|'EXN'|'HST'|'LP'|'OLD'|'PVT'|'PUB'|'SCN'|'SPR'|'RMP'|'UNP'|'OVP'|'ACCESS'|'ALTERNATE'|'BUSINESS'|'BYPASS'|'CONNECTOR'|'EXTENDED'|'EXTENSION'|'HISTORIC'|'LOOP'|'PRIVATE'|'PUBLIC'|'SCENIC'|'SPUR'|'RAMP'|'UNDERPASS'|'OVERPASS')
 	;
 
 directional
@@ -264,31 +294,29 @@ address : ((completeAddressNumber) SPACE (completeStreetName) (SPACE (completeSu
 completeAddressNumber : addressNumber ((SPACE)? addressNumberSuffix | concatenatedAddressNumberSuffix)?  
                       	-> ^(COMPLETE_ADDRESS_NUMBER addressNumber (SPACE)? (addressNumberSuffix)? (concatenatedAddressNumberSuffix)?)                                              
                       //prefix, number any maybe suffix
-                      | addressNumberPrefix SPACE addressNumber ((SPACE)? addressNumberSuffix| concatenatedAddressNumberSuffix)? 
+                      | addressNumberPrefix (SPACE)? addressNumber ((SPACE)? addressNumberSuffix| concatenatedAddressNumberSuffix)? 
                       	-> ^(COMPLETE_ADDRESS_NUMBER addressNumberPrefix addressNumber (SPACE)? (addressNumberSuffix)? (concatenatedAddressNumberSuffix)?) 
 		      ;
 //Numeric only per FGDC
 addressNumber : Numbers 
 		-> ^(ADDRESS_NUMBER Numbers)
 	      ;
-number : Numbers
-       ;
 //Only USPS Profile Supported 28 Sec. D1, D3
-addressNumberPrefix  : Letters (lettersOrNumbers)?
-			-> ^(ADDRESS_NUMBER_PREFIX Letters (lettersOrNumbers)?)
+addressNumberPrefix  : AbbreviatedDirectional
+			-> ^(ADDRESS_NUMBER_PREFIX AbbreviatedDirectional)
+		     |  Letters //(lettersOrNumbers)?
+			-> ^(ADDRESS_NUMBER_PREFIX Letters /*(lettersOrNumbers)?*/)
                      | addressNumber seperator addressNumber //Only Valid if SPACE Exists
                      	-> ^(ADDRESS_NUMBER_PREFIX addressNumber seperator addressNumber)
-       		     ;             
-
-//Required to eliminated shift-reduce conflict
-concatenatedAddressNumberPrefix : Letters ((lettersOrNumbers)? seperator)?
-					-> ^(ADDRESS_NUMBER_PREFIX Letters ((lettersOrNumbers)? seperator)?)                         
-			        ;                              
+       		     ;            
+                         
 //Only USPS Profile Supported 28 Sec. D4
 addressNumberSuffix : Numbers '/' Numbers    
 			-> ^(ADDRESS_NUMBER_SUFFIX Numbers '/' Numbers)                                  
 		    ;
-concatenatedAddressNumberSuffix : Letters (lettersOrNumbers)? 
+concatenatedAddressNumberSuffix : AbbreviatedDirectional
+					-> ^(ADDRESS_NUMBER_SUFFIX  AbbreviatedDirectional)                                
+				| Letters (lettersOrNumbers)? 
 					-> ^(ADDRESS_NUMBER_SUFFIX  Letters (lettersOrNumbers)?)                                
                                	| seperator Numbers '/' Numbers 
 					-> ^(ADDRESS_NUMBER_SUFFIX Numbers '/' Numbers)
@@ -309,31 +337,44 @@ seperator : DASH
 //StreetName
 //****************
 
-completeStreetName : ((streetNamePreDirectional SPACE)?  streetNamePreType SPACE ((streetName|specialStreetName) streetNamePostModifier) (SPACE streetNamePostDirectional)?)
+completeStreetName :((streetNamePreDirectional SPACE)?  streetNamePreType SPACE ((streetName|specialStreetName) streetNamePostModifier) (SPACE streetNamePostDirectional)?)
              		=> (streetNamePreDirectional SPACE)? streetNamePreType SPACE ((streetName|specialStreetName) streetNamePostModifier) (SPACE streetNamePostDirectional)?
                   		-> ^(COMPLETE_STREET_NAME (streetNamePreDirectional)?  streetNamePreType ^(STREET_NAME (streetName)? (specialStreetName)?) (streetNamePostModifier)? (streetNamePostDirectional)?)
-                   | (streetNamePreModifier SPACE)? (streetNamePreDirectional SPACE)? streetNamePreType (SPACE Numbers (SPACE streetNamePostDirectional)?)
-	                   -> ^(COMPLETE_STREET_NAME (streetNamePreModifier)? (streetNamePreDirectional)?  streetNamePreType ^(STREET_NAME (Numbers)?) (streetNamePostDirectional)?)
+                   | (streetNamePreModifier SPACE)? (streetNamePreDirectional SPACE)? streetNamePreType SPACE lettersOrNumbers (SPACE streetNamePostDirectional)?
+	                   -> ^(COMPLETE_STREET_NAME (streetNamePreModifier)? (streetNamePreDirectional)?  streetNamePreType ^(STREET_NAME (lettersOrNumbers)?) (streetNamePostDirectional)?)
 		   |  ((streetNamePreModifier SPACE)? streetNamePreDirectional SPACE (streetName|specialStreetName) streetNamePostModifier)
 			=> (streetNamePreModifier SPACE)? streetNamePreDirectional SPACE (streetName|specialStreetName) streetNamePostModifier (SPACE streetNamePostDirectional)?
 				-> ^(COMPLETE_STREET_NAME (streetNamePreModifier)? streetNamePreDirectional  ^(STREET_NAME (streetName)? (specialStreetName)?) streetNamePostModifier (streetNamePostDirectional)?)
-		   | ((streetName|specialStreetName) streetNamePostModifier) 
+		   | ((streetName|specialStreetName) streetNamePostModifier)  
 			=> (streetName|specialStreetName) streetNamePostModifier (SPACE streetNamePostDirectional)?
-        			-> ^(COMPLETE_STREET_NAME  ^(STREET_NAME  (streetName)? (specialStreetName)?) streetNamePostModifier (streetNamePostDirectional)?)                
-                
+        			-> ^(COMPLETE_STREET_NAME  ^(STREET_NAME  (streetName)? (specialStreetName)?) streetNamePostModifier (streetNamePostDirectional)?)                                
 		   ;
 //232,233 (partial)
 //edge case of 212 21ST AVE (ST is SUFFIX, binds closer than addressLettersOrNumbers
 //streetName : addressLettersOrNumbers SPACE(streetName | specialStreetName)?	
-streetName : addressLettersOrNumbers (SPACE (streetName | specialStreetName)?)
+streetName : addressLettersOrNumbers SPACE (streetName | specialStreetName)?
+           ;       
+//to handle an issue with Suffix reductions
+restrictedStreetName : addressLettersOrNumbers SPACE (restrictedStreetName | restrictedSpecialStreetName)?
            ;       
 
 specialStreetName  : highway SPACE (streetName|specialStreetName)?       		   
 		   | directional SPACE (streetName|specialStreetName)?
-                   | suffix SPACE (streetName|specialStreetName)?   
-                   | PreModifier SPACE (streetName|specialStreetName)?   
+		   | secondaryAddressIdentifier SPACE (streetName|specialStreetName)? 
+                   | suffix SPACE (restrictedStreetName|restrictedSpecialStreetName)?   
+                   | PreModifier SPACE (streetName|specialStreetName)? 
+//handle N FRONT ST, LOWER VALLEY PIKE, etc.                  
                    ;
+                   
 
+//to handle an issue with Suffix reductions
+restrictedSpecialStreetName  
+		   : highway SPACE (restrictedStreetName|restrictedSpecialStreetName)?       		   
+		   | directional SPACE (restrictedStreetName|restrictedSpecialStreetName)?
+                   | suffix SPACE (restrictedStreetName|restrictedSpecialStreetName)?   
+                   | PreModifier SPACE (restrictedStreetName|restrictedSpecialStreetName)? 
+                   ;
+                   
 streetNamePreModifier 
 	:	PreModifier
 		-> ^(STREET_NAME_PRE_MODIFIER PreModifier)
@@ -379,6 +420,7 @@ highway : StateRoute
         | StateHighway 
         | StateRoad 
         | TownshipRoad  
+        | CommonUSRoute
 	;
 union 	: SuffixHighwayUnion
         | SuffixHighwayFirstUnion
@@ -395,6 +437,11 @@ highwayFollow : HighwaysFollow
 //Subaddress
 //****************
 //18.213
+
+secondaryAddressIdentifier 
+	:	StandardSecondaryAddressType
+	|	ExtendedSecondaryAddressType 
+	;
 completeSubaddress : poundBasedSubaddressType 
 			-> ^(SUBADDRESS poundBasedSubaddressType)
                    | abbreviatedSubaddressType
@@ -407,12 +454,12 @@ poundBasedSubaddressType : '#' lettersOrNumbers
       				-> ^(SUBADDRESS_IDENTIFIER lettersOrNumbers)
 			 ;
 //18.213.1
-abbreviatedSubaddressType : StandardSecondaryAddressIdentifier SPACE subaddressIdentifier
-				-> ^(SUBADDRESS_TYPE StandardSecondaryAddressIdentifier) ^(SUBADDRESS_IDENTIFIER subaddressIdentifier)?
-                          | ExtendedSecondaryAddressIdentifier
-	                        -> ^(SUBADDRESS_TYPE ExtendedSecondaryAddressIdentifier)
-                          | ExtendedSecondaryAddressIdentifier SPACE subaddressIdentifier
-	                        -> ^(SUBADDRESS_TYPE ExtendedSecondaryAddressIdentifier) ^(SUBADDRESS_IDENTIFIER subaddressIdentifier)
+abbreviatedSubaddressType : StandardSecondaryAddressType SPACE subaddressIdentifier
+				-> ^(SUBADDRESS_TYPE StandardSecondaryAddressType) ^(SUBADDRESS_IDENTIFIER subaddressIdentifier)?
+                          | ExtendedSecondaryAddressType
+	                        -> ^(SUBADDRESS_TYPE ExtendedSecondaryAddressType)
+                          | ExtendedSecondaryAddressType SPACE subaddressIdentifier
+	                        -> ^(SUBADDRESS_TYPE ExtendedSecondaryAddressType) ^(SUBADDRESS_IDENTIFIER subaddressIdentifier)
 			  ;
 //street name gives us most flexibility here, may want to make seperate productions if we want special logic.			 
 subaddressIdentifier : /*(addressLettersOrNumbers | directional) (subaddressIdentifier)?
