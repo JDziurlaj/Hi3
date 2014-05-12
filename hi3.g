@@ -70,90 +70,97 @@ import java.util.LinkedList;
     }
 }
 @lexer::members {
-    /* http://stackoverflow.com/questions/8797484/antlr-lexer-tokens-that-match-similar-strings-what-if-the-greedy-lexer-makes-a/8800722#8800722 */
-    private boolean ahead(String text) {
-        for(int i = 0; i < text.length(); i++) {
-          if(input.LA(i + 1) != text.charAt(i)) {
+  /* http://stackoverflow.com/questions/8797484/antlr-lexer-tokens-that-match-similar-strings-what-if-the-greedy-lexer-makes-a/8800722#8800722 */
+   private boolean ahead(String text) {
+    int i = 0;
+      for(; i < text.length(); i++) {
+         if(input.LA(i + 1) != text.charAt(i)) {
             return false;
          }
-       }
-       return true;
-     }
+      }    
+        //get current input
+         int ch =  input.LA(i + 1);
+             
+       	//short circuit if we get -1, means <EOF>!
+         if(ch == -1 || ch == ' ')
+            return true;            
+
+      return false;
+   }   
      //ahead for Street Name Pre Types
-      private boolean ahead_pt(String text) {
-	int i = 0;
-      //get all the string we need
-        for(; i < text.length(); i++) {
-	  System.out.println(input.LA(i + 1) + "!=" + text.charAt(i));
-          if(input.LA(i + 1) != text.charAt(i)) {          
+   private boolean ahead_pt(String text) {
+      int i = 0;
+      //get all of the string we need
+      for(; i < text.length(); i++) {
+         if(input.LA(i + 1) != text.charAt(i)) {          
             //not the string we need
             return false;
          }
-       }
+      }
        //done getting the string, now accept any add'l letter(s) until we get a space
        //let's stop at 400, no address should be that long!
-       for(; i < 400; i++)
-       {
+      for(; i < 400; i++)
+      {
         //get current input
-       	int ch =  input.LA(i + 1);
+         int ch =  input.LA(i + 1);
        	//short circuit if we get -1, means <EOF>!
-       	if(ch == -1)
+         if(ch == -1)
             return false;
        	//http://docs.oracle.com/javase/tutorial/i18n/text/charintro.html
-       	if(!((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || (ch == ' ')))
-       	{
-	   
-   	   return false;
-       	}
-       	//check if we got a space!
-       	if(ch == ' ')
-       	{ 
-       
-       	//next char must be a number!
-	    	ch =  input.LA(++i + 1);
-       		if(ch >= '0' && ch <= '9')
-       		{
-       			return true;
-       		}
-       		//we could have a case where the following input is presented:
-       		//1 STATE RD N
-       		//in this case we want to parse STATE RD as the Street Name
-       		//and N as the post directional       		
-       		else if(ch != 'N' && ch != 'S' && ch != 'E' && ch != 'W' && ch != '#')
-       		{
-	       		ch =  input.LA(++i + 1);
-	       		//now look for a space
-	       		//we can't allow two character street names in this context
-	       		//as we might cause a mismatch with a secondary unit type. 
-	       		//e.g. PH, RM, etc.
-       			if(ch == ' ' || ch == 'E' || ch == 'W' || ch == -1)
-		       		return true;
-		       	else
-		       		return false;
-       		}
-       		else
-       		{       //we didn't get a SPACE followed by a number, so it is not a Street Name Pre Type!
-       			return false;
-       		}
-       	}
-
-       }
-       //went 400 characters and 
-       return false;
-     }
-    private List<String> errors = new LinkedList<String>();
-    public void displayRecognitionError(String[] tokenNames,
+         //if we get another alpha char before a space, then we don't have a PT
+         if(!((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || (ch == ' ')))
+         {
+            return false;
+         }
+                	//check if we got a space!
+         if(ch == ' ')
+         { 
+         //next char must be a number!
+            ch =  input.LA(++i + 1);
+            if(ch >= '0' && ch <= '9')
+            {
+               return true;
+            }
+            //we could have a case where the following input is presented:
+            //1 STATE RD N
+            //in this case we want to parse STATE RD as the Street Name
+            //and N as the post directional       		
+            else if(ch != 'N' && ch != 'S' && ch != 'E' && ch != 'W' && ch != '#')
+            {
+               ch =  input.LA(++i + 1);
+            	//now look for a space
+            	//we can't allow two character street names in this context
+            	//as we might cause a mismatch with a secondary unit type. 
+            	//e.g. PH, RM, etc.
+               if(ch == ' ' || ch == 'E' || ch == 'W' || ch == -1)
+                  return true;
+               else
+                  return false;
+            }
+            else
+            {       //we didn't get a SPACE followed by a number, so it is not a Street Name Pre Type!
+               return false;
+            }
+         }
+      
+      }
+       //went 400 characters and nothing
+      return false;
+   }
+   private List<String> errors = new LinkedList<String>();
+   public void displayRecognitionError(String[] tokenNames,
                                         RecognitionException e) {
-        String hdr = getErrorHeader(e);
-        String msg = getErrorMessage(e, tokenNames);
-        errors.add(hdr + " " + msg);
-    }
-    public List<String> getErrors() {
-        return errors;
-    }
+      String hdr = getErrorHeader(e);
+      String msg = getErrorMessage(e, tokenNames);
+      errors.add(hdr + " " + msg);
+   }
+   public List<String> getErrors() {
+      return errors;
+   }
 }
 /* USPS Pub 28 used as domain */
-Suffixes : ('ALLEE'|'ALLEY'|'ALLY'|'ALY'|'ANEX'|'ANNEX'|'ANNX'|'ANX'|'ARC'|'ARCADE'|'AV'|'AVE'|'AVEN'|'AVENU'|'AVENUE'|'AVN'|'AVNUE'|'BAYOO'|'BAYOU'|'BCH'|'BEACH'|'BEND'|'BLF'|'BLUF'|'BLUFF'|'BLUFFS'|'BLVD'|'BND'|'BOT'|'BOTTM'|'BOTTOM'|'BOUL'|'BOULEVARD'|'BOULV'|'BR'|'BRANCH'|'BRDGE'|'BRG'|'BRIDGE'|'BRK'|'BRNCH'|'BROOK'|'BROOKS'|'BTM'|'BURG'|'BURGS'|'CAMP'|'CANYN'|'CANYON'|'CAPE'|'CAUSEWAY'|'CAUSWA'|'CAUSWAY'|'CEN'|'CENT'|'CENTER'|'CENTERS'|'CENTR'|'CENTRE'|'CIR'|'CIRC'|'CIRCL'|'CIRCLE'|'CIRCLES'|'CK'|'CLB'|'CLF'|'CLFS'|'CLIFF'|'CLIFFS'|'CLUB'|'CMP'|'CNTER'|'CNTR'|'CNYN'|'COMMON'|'COMMONS'|'COR'|'CORNER'|'CORNERS'|'CORS'|'COURSE'|'COURT'|'COURTS'|'COVE'|'COVES'|'CP'|'CPE'|'CR'|'CRCL'|'CRCLE'|'CRECENT'|'CREEK'|'CRES'|'CRESCENT'|'CRESENT'|'CREST'|'CRK'|'CROSSING'|'CROSSROAD'|'CROSSROADS'|'CRSCNT'|'CRSE'|'CRSENT'|'CRSNT'|'CRSSING'|'CRSSNG'|'CRT'|'CSWY'|'CT'|'CTR'|'CTS'|'CURVE'|'CV'|'CYN'|'DALE'|'DAM'|'DIV'|'DIVIDE'|'DL'|'DM'|'DR'|'DRIV'|'DRIVE'|'DRIVES'|'DRV'|'DV'|'DVD'|'EST'|'ESTATE'|'ESTATES'|'ESTS'|'EXP'|'EXPR'|'EXPRESS'|'EXPW'|'EXPY'|'EXT'|'EXTENSION'|'EXTENSIONS'|'EXTN'|'EXTNSN'|'EXTS'|'FALL'|'FALLS'|'FERRY'|'FIELD'|'FIELDS'|'FLAT'|'FLATS'|'FLD'|'FLDS'|'FLS'|'FLT'|'FLTS'|'FORD'|'FORDS'|'FOREST'|'FORESTS'|'FORG'|'FORGE'|'FORGES'|'FORK'|'FORKS'|'FORT'|'FRD'|'FREEWAY'|'FREEWY'|'FRG'|'FRK'|'FRKS'|'FRRY'|'FRST'|'FRT'|'FRWAY'|'FRWY'|'FRY'|'FT'|'FWY'|'GARDEN'|'GARDENS'|'GARDN'|'GATEWAY'|'GATEWY'|'GATWAY'|'GDN'|'GDNS'|'GLEN'|'GLENS'|'GLN'|'GRDEN'|'GRDN'|'GRDNS'|'GREEN'|'GREENS'|'GRN'|'GROV'|'GROVE'|'GROVES'|'GRV'|'GTWAY'|'GTWY'|'HARB'|'HARBOR'|'HARBORS'|'HARBR'|'HAVEN'|'HAVN'|'HBR'|'HEIGHT'|'HEIGHTS'|'HGTS'|'HIGHWY'|'HILL'|'HILLS'|'HL'|'HLLW'|'HLS'|'HOLLOW'|'HOLLOWS'|'HOLW'|'HOLWS'|'HRBOR'|'HT'|'HTS'|'HVN'|'HWAY'|'HWY'|'INLET'|'INLT'|'IS'|'ISLAND'|'ISLANDS'|'ISLE'|'ISLES'|'ISLND'|'ISLNDS'|'ISS'|'JCT'|'JCTION'|'JCTN'|'JCTNS'|'JCTS'|'JUNCTION'|'JUNCTIONS'|'JUNCTN'|'JUNCTON'|'KEY'|'KEYS'|'KNL'|'KNLS'|'KNOL'|'KNOLL'|'KNOLLS'|'KY'|'KYS'|'LA'|'LAKE'|'LAKES'|'LAND'|'LANDING'|'LANE'|'LANES'|'LCK'|'LCKS'|'LDG'|'LDGE'|'LF'|'LGT'|'LIGHT'|'LIGHTS'|'LK'|'LKS'|'LN'|'LNDG'|'LNDNG'|'LOAF'|'LOCK'|'LOCKS'|'LODG'|'LODGE'|'LOOPS'|'MALL'|'MANOR'|'MANORS'|'MDW'|'MDWS'|'MEADOW'|'MEADOWS'|'MEDOWS'|'MEWS'|'MILL'|'MILLS'|'MISSION'|'MISSN'|'ML'|'MLS'|'MNR'|'MNRS'|'MNT'|'MNTAIN'|'MNTN'|'MNTNS'|'MOTORWAY'|'MOUNT'|'MOUNTAIN'|'MOUNTAINS'|'MOUNTIN'|'MSN'|'MSSN'|'MT'|'MTIN'|'MTN'|'NCK'|'NECK'|'ORCH'|'ORCHARD'|'ORCHRD'|'OVAL'|'OVERPASS'|'OVL'|'PARK'|'PARKS'|'PARKWAY'|'PARKWAYS'|'PARKWY'|'PASS'|'PASSAGE'|'PATH'|'PATHS'|'PIKE'|'PIKES'|'PINE'|'PINES'|'PK'|'PKWAY'|'PKWY'|'PKWYS'|'PKY'|'PL'|'PLACE'|'PLAIN'|'PLAINES'|'PLAINS'|'PLAZA'|'PLN'|'PLNS'|'PLZ'|'PLZA'|'PNES'|'POINT'|'POINTS'|'PORT'|'PORTS'|'PR'|'PRAIRIE'|'PRARIE'|'PRK'|'PRR'|'PRT'|'PRTS'|'PT'|'PTS'|'RAD'|'RADIAL'|'RADIEL'|'RADL'|'RAMP'|'RANCH'|'RANCHES'|'RAPID'|'RAPIDS'|'RDG'|'RDGE'|'RDGS'|'RDS'|'REST'|'RIDGE'|'RIDGES'|'RIV'|'RIVER'|'RIVR'|'RNCH'|'RNCHS'|'ROAD'|'ROADS'|'ROUTE'|'ROW'|'RPD'|'RPDS'|'RST'|'RUE'|'RUN'|'RVR'|'SHL'|'SHLS'|'SHOAL'|'SHOALS'|'SHOAR'|'SHOARS'|'SHORE'|'SHORES'|'SHR'|'SHRS'|'SKYWAY'|'SMT'|'SPG'|'SPGS'|'SPNG'|'SPNGS'|'SPRING'|'SPRINGS'|'SPRNG'|'SPRNGS'|'SPUR'|'SPURS'|'SQ'|'SQR'|'SQRE'|'SQRS'|'SQU'|'SQUARE'|'SQUARES'|'ST'|'STA'|'STATION'|'STATN'|'STN'|'STR'|'STRA'|'STRAV'|'STRAVE'|'STRAVEN'|'STRAVENUE'|'STRAVN'|'STREAM'|'STREET'|'STREETS'|'STREME'|'STRM'|'STRT'|'STRVN'|'STRVNUE'|'SUMIT'|'SUMITT'|'SUMMIT'|'TER'|'TERR'|'TERRACE'|'THROUGHWAY'|'TPK'|'TPKE'|'TR'|'TRACE'|'TRACES'|'TRACK'|'TRACKS'|'TRAFFICWAY'|'TRAIL'|'TRAILS'|'TRAK'|'TRCE'|'TRFY'|'TRK'|'TRKS'|'TRL'|'TRLRS'|'TRLS'|'TRNPK'|'TRPK'|'TUNEL'|'TUNL'|'TUNLS'|'TUNNEL'|'TUNNELS'|'TUNNL'|'TURNPIKE'|'TURNPK'|'UN'|'UNDERPASS'|'UNION'|'UNIONS'|'VALLEY'|'VALLEYS'|'VALLY'|'VDCT'|'VIA'|'VIADCT'|'VIADUCT'|'VIEW'|'VIEWS'|'VILL'|'VILLAG'|'VILLAGE'|'VILLAGES'|'VILLE'|'VILLG'|'VILLIAGE'|'VIS'|'VIST'|'VISTA'|'VL'|'VLG'|'VLGS'|'VLLY'|'VLY'|'VLYS'|'VST'|'VSTA'|'VW'|'VWS'|'WALK'|'WALKS'|'WALL'|'WAY'|'WAYS'|'WELL'|'WELLS'|'WLS'|'WY'|'XING'
+/* TRAILER and TRLR have been removed to avoid conflicts with SUD */
+Suffixes : ('ALLEE'|'ALLEY'|'ALLY'|'ALY'|'ANEX'|'ANNEX'|'ANNX'|'ANX'|'ARC'|'ARCADE'|'AV'|'AVE'|'AVEN'|'AVENU'|'AVENUE'|'AVN'|'AVNUE'|'BCH'|'BEACH'|'BG'|'BURG'|'BGS'|'BURGS'|'BLF'|'BLUF'|'BLUFF'|'BLFS'|'BLUFFS'|'BLVD'|'BOUL'|'BOULEVARD'|'BOULV'|'BEND'|'BND'|'BR'|'BRANCH'|'BRNCH'|'BRDGE'|'BRG'|'BRIDGE'|'BRK'|'BROOK'|'BRKS'|'BROOKS'|'BOT'|'BOTTM'|'BOTTOM'|'BTM'|'BAYOO'|'BAYOU'|'BYU'|'CIR'|'CIRC'|'CIRCL'|'CIRCLE'|'CRCL'|'CRCLE'|'CIRCLES'|'CIRS'|'CLB'|'CLUB'|'CLF'|'CLIFF'|'CLFS'|'CLIFFS'|'CMN'|'COMMON'|'CMNS'|'COMMONS'|'COR'|'CORNER'|'CORNERS'|'CORS'|'CAMP'|'CMP'|'CP'|'CAPE'|'CPE'|'CRECENT'|'CRES'|'CRESCENT'|'CRESENT'|'CRSCNT'|'CRSENT'|'CRSNT'|'CK'|'CR'|'CREEK'|'CRK'|'COURSE'|'CRSE'|'CREST'|'CRST'|'CAUSEWAY'|'CAUSWA'|'CAUSWAY'|'CSWY'|'COURT'|'CRT'|'CT'|'CEN'|'CENT'|'CENTER'|'CENTR'|'CENTRE'|'CNTER'|'CNTR'|'CTR'|'CENTERS'|'CTRS'|'COURTS'|'CTS'|'CURV'|'CURVE'|'COVE'|'CV'|'COVES'|'CVS'|'CANYN'|'CANYON'|'CNYN'|'CYN'|'DALE'|'DL'|'DAM'|'DM'|'DR'|'DRIV'|'DRIVE'|'DRV'|'DRIVES'|'DRS'|'DIV'|'DIVIDE'|'DV'|'DVD'|'EST'|'ESTATE'|'ESTATES'|'ESTS'|'EXP'|'EXPR'|'EXPRESS'|'EXPW'|'EXPY'|'EXT'|'EXTENSION'|'EXTN'|'EXTNSN'|'EXTENSIONS'|'EXTS'|'FALL'|'FIELD'|'FLD'|'FIELDS'|'FLDS'|'FALLS'|'FLS'|'FLAT'|'FLT'|'FLATS'|'FLTS'|'FORD'|'FRD'|'FORDS'|'FRDS'|'FORG'|'FORGE'|'FRG'|'FORGES'|'FRGS'|'FORK'|'FRK'|'FORKS'|'FRKS'|'FOREST'|'FORESTS'|'FRST'|'FERRY'|'FRRY'|'FRY'|'FORT'|'FRT'|'FT'|'FREEWAY'|'FREEWY'|'FRWAY'|'FRWY'|'FWY'|'GARDEN'|'GARDN'|'GDN'|'GRDEN'|'GRDN'|'GARDENS'|'GDNS'|'GRDNS'|'GLEN'|'GLN'|'GLENS'|'GLNS'|'GREEN'|'GRN'|'GREENS'|'GRNS'|'GROV'|'GROVE'|'GRV'|'GROVES'|'GRVS'|'GATEWAY'|'GATEWY'|'GATWAY'|'GTWAY'|'GTWY'|'HARB'|'HARBOR'|'HARBR'|'HBR'|'HRBOR'|'HARBORS'|'HBRS'|'HILL'|'HL'|'HILLS'|'HLS'|'HLLW'|'HOLLOW'|'HOLLOWS'|'HOLW'|'HOLWS'|'HEIGHT'|'HEIGHTS'|'HGTS'|'HT'|'HTS'|'HAVEN'|'HAVN'|'HVN'|'HIGHWY'|'HIWAY'|'HIWY'|'HWAY'|'HWY'|'INLET'|'INLT'|'IS'|'ISLAND'|'ISLND'|'ISLE'|'ISLES'|'ISLANDS'|'ISLNDS'|'ISS'|'JCT'|'JCTION'|'JCTN'|'JUNCTION'|'JUNCTN'|'JUNCTON'|'JCTNS'|'JCTS'|'JUNCTIONS'|'KNL'|'KNOL'|'KNOLL'|'KNLS'|'KNOLLS'|'KEY'|'KY'|'KEYS'|'KYS'|'LAND'|'LCK'|'LOCK'|'LCKS'|'LOCKS'|'LDG'|'LDGE'|'LODG'|'LODGE'|'LF'|'LOAF'|'LGT'|'LIGHT'|'LGTS'|'LIGHTS'|'LAKE'|'LK'|'LAKES'|'LKS'|'LA'|'LANE'|'LANES'|'LN'|'LANDING'|'LNDG'|'LNDNG'|'LOOPS'|'MALL'|'MEADOW'|'MDW'|'MDWS'|'MEADOWS'|'MEDOWS'|'MEWS'|'MILL'|'ML'|'MILLS'|'MLS'|'MANOR'|'MNR'|'MANORS'|'MNRS'|'MISSION'|'MISSN'|'MSN'|'MSSN'|'MNT'|'MOUNT'|'MT'|'MNTAIN'|'MNTN'|'MOUNTAIN'|'MOUNTIN'|'MTIN'|'MTN'|'MNTNS'|'MOUNTAINS'|'MTNS'|'MOTORWAY'|'MTWY'|'NCK'|'NECK'|'OPAS'|'OVERPASS'|'ORCH'|'ORCHARD'|'ORCHRD'|'OVAL'|'OVL'|'PARK'|'PARKS'|'PK'|'PRK'|'PASS'|'PATH'|'PATHS'|'PIKE'|'PIKES'|'PARKWAY'|'PARKWAYS'|'PARKWY'|'PKWAY'|'PKWY'|'PKWYS'|'PKY'|'PL'|'PLACE'|'PLAIN'|'PLN'|'PLAINES'|'PLAINS'|'PLNS'|'PLAZA'|'PLZ'|'PLZA'|'PINE'|'PNE'|'PINES'|'PNES'|'PR'|'PRAIRIE'|'PRARIE'|'PRR'|'PORT'|'PRT'|'PORTS'|'PRTS'|'PASSAGE'|'PSGE'|'POINT'|'PT'|'POINTS'|'PTS'|'RAD'|'RADIAL'|'RADIEL'|'RADL'|'RAMP'|'RDG'|'RDGE'|'RIDGE'|'RDGS'|'RIDGES'|'RDS'|'ROADS'|'RIV'|'RIVER'|'RIVR'|'RVR'|'RANCH'|'RANCHES'|'RNCH'|'RNCHS'|'ROW'|'RAPID'|'RPD'|'RAPIDS'|'RPDS'|'REST'|'RST'|'RUE'|'RUN'|'SHL'|'SHOAL'|'SHLS'|'SHOALS'|'SHOAR'|'SHORE'|'SHR'|'SHOARS'|'SHORES'|'SHRS'|'SKWY'|'SKYWAY'|'SMT'|'SUMIT'|'SUMITT'|'SUMMIT'|'SPG'|'SPNG'|'SPRING'|'SPRNG'|'SPGS'|'SPNGS'|'SPRINGS'|'SPRNGS'|'SPUR'|'SPURS'|'SQ'|'SQR'|'SQRE'|'SQU'|'SQUARE'|'SQRS'|'SQS'|'SQUARES'|'ST'|'STR'|'STREET'|'STRT'|'STA'|'STATION'|'STATN'|'STN'|'STRA'|'STRAV'|'STRAVE'|'STRAVEN'|'STRAVENUE'|'STRAVN'|'STRVN'|'STRVNUE'|'STREAM'|'STREME'|'STRM'|'STREETS'|'STS'|'TER'|'TERR'|'TERRACE'|'TPK'|'TPKE'|'TRNPK'|'TRPK'|'TURNPIKE'|'TURNPK'|'TRACK'|'TRACKS'|'TRAK'|'TRK'|'TRKS'|'TRACE'|'TRACES'|'TRCE'|'TRAFFICWAY'|'TRFY'|'TR'|'TRAIL'|'TRAILS'|'TRL'|'TRLS'|'TRLRS'|'THROUGHWAY'|'TRWY'|'TUNEL'|'TUNL'|'TUNLS'|'TUNNEL'|'TUNNELS'|'TUNNL'|'UN'|'UNION'|'UNIONS'|'UNS'|'UNDERPASS'|'UPAS'|'VDCT'|'VIA'|'VIADCT'|'VIADUCT'|'VIS'|'VIST'|'VISTA'|'VST'|'VSTA'|'VILLE'|'VL'|'VILL'|'VILLAG'|'VILLAGE'|'VILLG'|'VILLIAGE'|'VLG'|'VILLAGES'|'VLGS'|'VALLEY'|'VALLY'|'VLLY'|'VLY'|'VALLEYS'|'VLYS'|'VIEW'|'VW'|'VIEWS'|'VWS'|'WALK'|'WALKS'|'WALL'|'WAY'|'WY'|'WAYS'|'WELL'|'WL'|'WELLS'|'WLS'|'CROSSING'|'CRSSING'|'CRSSNG'|'XING'|'CROSSROAD'|'XRD'|'CROSSROADS'|'XRDS'
 );
 //Highways
 //Anything with a space will require a semantic predicate :(
@@ -161,7 +168,8 @@ Suffixes : ('ALLEE'|'ALLEY'|'ALLY'|'ALY'|'ANEX'|'ANNEX'|'ANNX'|'ANX'|'ARC'|'ARCA
 
 //Semantic Predicate for STATE ROUTE must be spelled out to ensure it does not match STATE ROAD or something else
 //ST RT is spelled out to avoid ST RACHEL (as in Saint)
-StateRoute : {ahead_pt("ST R")||ahead_pt("STATE R")||ahead_pt("SR MM")}?
+//had to add a three letter lookahead past the space to avoid conflicts withSeconary Units like REAR, ROOM, etc.
+StateRoute : {ahead_pt("ST ROU")||ahead_pt("STATE ROU")||ahead_pt("ST RT")||ahead_pt("STATE RT")||ahead_pt("SR MM")}?
 		=> ('STATE' SPACE 'ROUTE'|'STATE' SPACE 'RTE'|'STATE' SPACE 'RT'|
 		//sr
 		//'SR'
@@ -209,7 +217,7 @@ StateHighway : {ahead_pt("STATE H")||ahead_pt("ST H")}?
 		//st h
 		|'ST' SPACE 'HIGHWAY'|'ST' SPACE 'HIGHWY'|'ST' SPACE 'HIWAY'|'ST' SPACE 'HIWY'|'ST' SPACE 'HWAY''ST' SPACE 'HWY');
 		
-StateRoad : {ahead_pt("STATE R")||ahead_pt("ST R")/*||ahead_pt("SR")*/}? 
+StateRoad : {ahead_pt("STATE RD")||ahead_pt("ST RD")||ahead_pt("STATE RO")||ahead_pt("ST RO")}? 
 		=> ('STATE' SPACE 'ROAD'|'STATE' SPACE 'RD'
 		//st r
 		|'ST' SPACE 'RD'|'ST' SPACE 'ROAD'
@@ -236,15 +244,20 @@ HighwaysFollow : {ahead_pt("FRONTAGE R")}?
 
 //Tokens shared by more than one class
 SuffixHighwayUnion 
-	:	 ('EXPRESSWAY'|'RD'|'RTE'|'ROUTE'|'LOOP')                   ;
+	:	 ('EXPY'|'EXPRESSWAY'|'ROAD'|'RD'|'RTE'|'ROUTE'|'LOOP');
 SuffixHighwayFirstUnion 
 	:	 ('HIGHWAY'|'HIGHWY'|'HIWAY'|'HIWY'|'HWAY'|'HWY');
 SuffixHighwayFollowUnion 
 	:	 ('BYP'|'BYPA'|'BYPAS'|'BYPASS'|'BYPS');
     
 //Designators
+
+SuffixStandardSecondaryAddressTypeUnion 
+	: ('TRAILER'|'TRLR');
+
 /* Those commented out have no addresses in the wild from our CASS */
-StandardSecondaryAddressType: ('APARTMENT'|'APT'|'BUILDING'|'BLDG'|'DEPARTMENT'|'DEPT'|'FLOOR'|'FL'|'HANGER'|'HNGR'|'KEY'|'LOT'|'PIER'|'ROOM'|'RM'|'SLIP'|'SPACE'|'SPC'|'STOP'|'SUITE'|'STE'|'TRAILER'|'TRLR'|'UNIT');
+/* Note that USPS Pub 28 uses HANGER, but the website uses HANGAR */
+StandardSecondaryAddressType: ('APARTMENT'|'APT'|'BUILDING'|'BLDG'|'DEPARTMENT'|'DEPT'|'FLOOR'|'FL'|'HANGER'|'HNGR'|'KEY'|'LOT'|'PIER'|'ROOM'|'RM'|'SLIP'|'SPACE'|'SPC'|'STOP'|'SUITE'|'STE'|'UNIT');
 ExtendedSecondaryAddressType : ('BASEMENT'|'BSMT'|'FRONT'|'FRNT'|'LOBBY'|'LBBY'|'LOWER'|'LOWR'|'OFFICE'|'OFC'|'PENTHOUSE'|'PH'|'REAR'|'SIDE'|'UPPER'|'UPPR');
 
 
@@ -260,7 +273,7 @@ Directional
 	:	 ('NORTH'|'SOUTH'|'EAST'|'WEST'|'NORTHWEST'|'NORTHEAST'|'SOUTHWEST'|'SOUTHEAST')
 	;
 SpacedDirectional
-	: 	{ahead_pt("NORTH WEST")||ahead_pt("NORTH EAST")||ahead_pt("SOUTH WEST")||ahead_pt("SOUTH EAST")}?
+	: 	{ahead("NORTH WEST")||ahead("NORTH EAST")||ahead("SOUTH WEST")||ahead("SOUTH EAST")}?
 			=> ('NORTH' SPACE 'WEST'|'NORTH' SPACE 'EAST'|'SOUTH' SPACE 'WEST'|'SOUTH' SPACE 'EAST');
 
 /* Domain sourced from TIGER Technical Documentation 2013 (Appendix E) */
@@ -345,7 +358,7 @@ completeStreetName :((streetNamePreDirectional SPACE)?  streetNamePreType SPACE 
 		   |  ((streetNamePreModifier SPACE)? streetNamePreDirectional SPACE (streetName|specialStreetName) streetNamePostModifier)
 			=> (streetNamePreModifier SPACE)? streetNamePreDirectional SPACE (streetName|specialStreetName) streetNamePostModifier (SPACE streetNamePostDirectional)?
 				-> ^(COMPLETE_STREET_NAME (streetNamePreModifier)? streetNamePreDirectional  ^(STREET_NAME (streetName)? (specialStreetName)?) streetNamePostModifier (streetNamePostDirectional)?)
-		   | ((streetName|specialStreetName) streetNamePostModifier)  
+		   | ((streetName|specialStreetName) streetNamePostModifier) 
 			=> (streetName|specialStreetName) streetNamePostModifier (SPACE streetNamePostDirectional)?
         			-> ^(COMPLETE_STREET_NAME  ^(STREET_NAME  (streetName)? (specialStreetName)?) streetNamePostModifier (streetNamePostDirectional)?)                                
 		   ;
@@ -409,6 +422,8 @@ suffix : Suffixes
        | SuffixHighwayUnion
        | SuffixHighwayFirstUnion
        | SuffixHighwayFollowUnion
+//not a problem removing this for OH, but may exist in other states
+//       | SuffixStandardSecondaryAddressTypeUnion
        ;
 //NUMBER at end of highway not part of Highway per FGDC
 highway : StateRoute 
@@ -441,7 +456,9 @@ highwayFollow : HighwaysFollow
 secondaryAddressIdentifier 
 	:	StandardSecondaryAddressType
 	|	ExtendedSecondaryAddressType 
+	|	SuffixStandardSecondaryAddressTypeUnion
 	;
+	
 completeSubaddress : poundBasedSubaddressType 
 			-> ^(SUBADDRESS poundBasedSubaddressType)
                    | abbreviatedSubaddressType
